@@ -23,9 +23,22 @@ def count_first_digit(column_name, data):
 def create_histogram(data, total_count):
     histogram = {}
     for digit in range(1,10):
-        histogram[str(digit)] = data[digit - 1] / total_count
+        histogram[str(digit)] = (data[digit - 1] / total_count) * 100
     
     return histogram
+
+benfords_law = {
+    "1": 30.1,
+    "2": 17.6,
+    "3": 12.5,
+    "4": 9.7,
+    "5": 7.9,
+    "6": 6.7,
+    "7": 5.8,
+    "8": 5.1,
+    "9": 4.6
+}
+
 
 if len(sys.argv) < 3:
     print('Usage: benford.py <filename> <column-to-create-benford-graph-on>')
@@ -35,17 +48,25 @@ column_name = sys.argv[2]
 encoding = sys.argv[3] if len(sys.argv) > 3 else 'iso-8859-1'
 
 fields = [column_name]
-data = pd.read_csv(filename, sep=',', usecols=fields, encoding=encoding)
 
+data = pd.read_csv(filename, sep=',', usecols=fields, encoding=encoding)
 total_count, data_count  = count_first_digit(column_name, data)
-# data_count_df = DataFrame(data_count, columns=[''])
-# print("\nobserved counts = {}".format(data_count))
 histogram = create_histogram(data_count, total_count)
-plt.bar(range(len(histogram)), list(histogram.values()), align='center')
+
+width = 0.3
+
+plt.title('Check against Benford\'s law')
+plt.xlabel('Leading Digit')
+plt.ylabel('Percentage in data set')
 plt.xticks(range(len(histogram)), list(histogram.keys()))
+plt.grid(color='#95a5a6', linestyle='--', linewidth=2, axis='y', alpha=0.3)
+plt.bar(range(len(benfords_law)), list(benfords_law.values()), width=width, label='Benford\'s Law Value')
+plt.bar(np.arange(len(histogram)) + width, list(histogram.values()), width=width, label='Input Dataset Value')
+plt.legend()
+
 
 for digit in range(1,10):
-    print("digit: "+ str(digit) + ", percentage: "+ str(histogram[str(digit)] * 100) + "%")
+    print("digit: "+ str(digit) + ", percentage: "+ str(histogram[str(digit)] ) + "%")
     
 plt.show()
 
